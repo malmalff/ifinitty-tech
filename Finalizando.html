@@ -78,8 +78,13 @@
             <input type="text" class="form-input" id="house-number" placeholder="Número da Casa" required>
             <input type="text" class="form-input" id="city" placeholder="Cidade" required>
 
-            <input type="text" class="form-input" id="cep" placeholder="CEP (ex: 64750-000)" oninput="formatCEP(this); addDeliveryFee()" maxlength="9" required>
-            <small style="color: red;">* Entregamos com taxa de R$3,00 para os CEPs 64750-000 e 64755-000. Outros CEPs têm taxa de R$5,00.</small>
+            <!-- Alteração para select de CEP -->
+            <select class="form-input" id="cep" onchange="addDeliveryFee()" required>
+                <option value="">Selecione o CEP</option>
+                <option value="64750-000">64750-000</option>
+                <option value="64755-000">64755-000</option>
+            </select>
+            <small style="color: red;">* Entregamos apenas para os CEPs 64750-000 e 64755-000.</small>
 
             <input type="text" class="form-input" id="reference" placeholder="Ponto de Referência" required>
             <input type="email" class="form-input" id="email" placeholder="Email" required>
@@ -141,28 +146,20 @@
         }
 
         function addDeliveryFee() {
-            const cep = document.getElementById("cep").value.trim();
+            const cep = document.getElementById("cep").value;
             const deliveryInfo = document.getElementById("delivery-info");
 
+            // Verifica se o CEP selecionado é válido
             if (cep === "64750-000" || cep === "64755-000") {
-                deliveryFee = 0.00;
+                deliveryFee = 0.00;  // Taxa de entrega para esses CEPs
                 deliveryInfo.innerHTML = "Taxa de entrega: R$ 3,00 (região atendida)";
-            } else if (/^\d{5}-\d{3}$/.test(cep)) {
-                deliveryFee = 5.00;
-                deliveryInfo.innerHTML = "Taxa de entrega: R$ 5,00 (fora da área principal de atendimento)";
             } else {
                 deliveryFee = 0;
-                deliveryInfo.innerHTML = "⚠️ CEP inválido. Use o formato 00000-000.";
+                deliveryInfo.innerHTML = "⚠️ Selecione um CEP válido (64750-000 ou 64755-000).";
             }
 
             displayCart();
             enableSubmitButton();
-        }
-
-        function formatCEP(input) {
-            input.value = input.value.replace(/\D/g, "")
-                                     .replace(/^(\d{5})(\d)/, "$1-$2")
-                                     .slice(0, 9);
         }
 
         function enableSubmitButton() {
@@ -202,7 +199,29 @@
             let message = `Olá! Gostaria de finalizar este pedido:%0A%0A${productList}%0A%0AFrete: R$ ${deliveryFee.toFixed(2)}%0ATotal: R$ ${total.toFixed(2)}%0A%0AEntregar para:%0A${name}%0A${street}, Nº ${number}, ${neighborhood}%0A${city} - ${cep}%0APonto de referência: ${reference}%0ATelefone: ${phone}%0AForma de pagamento: ${payment}`;
 
             let whatsappURL = `https://wa.me/558994041665?text=${message}`;
-            window.location.href = whatsappURL;
+            window.open(whatsappURL, "_blank");
+
+            // Armazena os detalhes do pedido
+            localStorage.setItem("orderDetails", JSON.stringify({
+                name, street, neighborhood, number, city, cep, reference, phone, email, payment, cart
+            }));
+
+            // Exibe o código de rastreamento (simulado)
+            const trackingCode = "RASTREIO123456";
+            document.getElementById("trackingCode").textContent = `Seu código de rastreamento é: ${trackingCode}`;
+            document.getElementById("trackingCodeContainer").style.display = "block";
+
+            // Exibe os detalhes do pedido
+            document.getElementById("buyerName").textContent = name;
+            document.getElementById("buyerAddress").textContent = `${street}, Nº ${number}, ${neighborhood}, ${city} - ${cep}`;
+            document.getElementById("buyerPhone").textContent = phone;
+            document.getElementById("buyerEmail").textContent = email;
+            document.getElementById("orderDetailsContainer").style.display = "block";
+
+            // Limpa o carrinho
+            localStorage.removeItem("cart");
+            cart = [];
+            displayCart();
         }
 
         displayCart();
