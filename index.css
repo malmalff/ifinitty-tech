@@ -22,7 +22,7 @@ body {
         
         .floating-cart:hover {
             transform: scale(1.1);
-            background-color: #f0f0f0;
+            background-color: #h1h1;
         }
         
         .logo-top-right {
@@ -35,7 +35,7 @@ body {
         }
         
         a {
-            color: inherit;         /* Usa a cor do elemento pai */
+            color: #red;         /* Usa a cor do elemento pai */
             
         }
         
